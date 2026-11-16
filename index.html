@@ -1,0 +1,947 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Quant Interview Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: sticky Kopfzeile, darunter eine Skill Map in vier Stufen; Skill-Seiten sind einspaltige Lernseiten. */
+:root{
+  --bg:#EEF1F5;--surface:#FFFFFF;--surface2:#E3E8EF;--fg:#101A26;--muted:#4F5E70;--line:#C8D1DC;
+  --accent:#1F4FD8;--accent-fg:#FFFFFF;--accent-soft:#DDE6FB;
+  --good:#0F7A57;--good-soft:#D7F0E6;--warn:#8F5400;--warn-soft:#FBE8C8;--bad:#B3261E;--bad-soft:#FADAD6;
+  --f-head:"Space Grotesk",system-ui,-apple-system,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C1118;--surface:#141C26;--surface2:#1C2733;--fg:#E7EDF4;--muted:#9AA8BA;--line:#2B3746;
+    --accent:#86A5FF;--accent-fg:#0C1118;--accent-soft:#1B2B55;
+    --good:#52D0A4;--good-soft:#123A2E;--warn:#F3B65F;--warn-soft:#3F2C0E;--bad:#FF9185;--bad-soft:#4A1C18;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C1118;--surface:#141C26;--surface2:#1C2733;--fg:#E7EDF4;--muted:#9AA8BA;--line:#2B3746;
+  --accent:#86A5FF;--accent-fg:#0C1118;--accent-soft:#1B2B55;
+  --good:#52D0A4;--good-soft:#123A2E;--warn:#F3B65F;--warn-soft:#3F2C0E;--bad:#FF9185;--bad-soft:#4A1C18;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+a{color:var(--accent)}
+h1,h2,h3{font-family:var(--f-head);line-height:1.2;text-wrap:balance;margin:0}
+code,.mono{font-family:var(--f-mono);font-size:.92em}
+code{background:var(--surface2);padding:.1em .35em;border-radius:4px}
+pre{background:var(--surface2);padding:12px 14px;border-radius:6px;overflow-x:auto;margin:10px 0;font-size:14px;line-height:1.5}
+pre code{background:none;padding:0}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{max-width:1080px;margin:0 auto;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px}
+.brand{font-family:var(--f-head);font-weight:700;font-size:19px;color:var(--fg);text-decoration:none;letter-spacing:-.01em}
+.top nav{display:flex;gap:4px;flex-wrap:wrap;margin-right:auto}
+.top nav a{min-height:40px;display:inline-flex;align-items:center;padding:0 12px;border-radius:6px;color:var(--muted);text-decoration:none;font-weight:500;font-size:15px}
+.top nav a[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+.overall{display:flex;align-items:center;gap:10px;font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.overall .bar{width:120px}
+.bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:3px}
+
+main{max-width:1080px;margin:0 auto;padding-block:24px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lead{color:var(--muted);max-width:62ch;margin:6px 0 0}
+
+.next{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin:18px 0 8px}
+.next h2{font-size:22px;margin-top:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border-radius:6px;border:1px solid var(--line);background:var(--surface);font-weight:500;text-decoration:none;color:var(--fg)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn.small{min-height:40px;padding:0 14px;font-size:15px}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 4px}
+.chips .btn{min-height:40px;padding:0 14px;font-size:15px}
+
+.review{background:var(--warn-soft);border:1px solid var(--line);border-radius:8px;padding:14px 18px;margin:16px 0;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+.review b{color:var(--warn)}
+
+.tier{margin-top:34px}
+.tier-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:14px}
+.tier-h h2{font-size:22px}
+.tier-h p{margin:0;color:var(--muted);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.node{display:flex;flex-direction:column;gap:8px;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;text-decoration:none;color:var(--fg)}
+.node:hover{border-color:var(--accent)}
+.node h3{font-size:18px}
+.node .blurb{margin:0;font-size:14.5px;color:var(--muted);flex:1}
+.node .pre{font-size:13px;color:var(--muted);margin:0}
+.dom{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.meta{display:flex;justify-content:space-between;gap:8px;font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.st{font-weight:500}
+.node[data-st="learning"] .st{color:var(--warn)}
+.node[data-st="done"] .st{color:var(--good)}
+.node[data-st="done"] .bar i{background:var(--good)}
+.node[data-st="done"]{border-color:var(--good)}
+
+.crumbs{font-size:15px;margin-bottom:14px}
+.skill-h{margin-bottom:18px}
+.skill-h h1{font-size:34px;margin:4px 0 8px}
+.prelinks{font-size:15px;color:var(--muted)}
+.lesson{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 20px 18px;max-width:820px}
+.lesson h3{font-size:19px;margin:20px 0 6px}
+.lesson p,.lesson li{max-width:68ch}
+.lesson ol,.lesson ul{padding-left:22px}
+.lesson li{margin:4px 0}
+.callout{background:var(--accent-soft);border-radius:6px;padding:10px 14px;margin:14px 0}
+.callout b:first-child{color:var(--accent)}
+.lesson table{border-collapse:collapse;margin:10px 0;font-size:15px}
+.lesson th,.lesson td{border:1px solid var(--line);padding:6px 12px;text-align:center}
+.lesson th{background:var(--surface2)}
+.tablewrap{overflow-x:auto}
+.readrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:14px}
+
+.probs-h{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;margin:34px 0 12px}
+.probs-h h2{font-size:24px}
+.prob{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin-bottom:14px;max-width:820px}
+.prob-h{display:flex;justify-content:space-between;gap:10px;font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.prob-h .skl{color:var(--muted)}
+.prob .q{margin:8px 0 12px;max-width:66ch}
+.prob.s-ok{border-color:var(--good)}
+.prob.s-unsure{border-color:var(--warn)}
+.prob.s-miss{border-color:var(--bad)}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+textarea{width:100%;min-height:76px;margin:10px 0;padding:10px 12px;font:inherit;font-size:16px;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;resize:vertical}
+.hint{margin:8px 0;padding:8px 12px;background:var(--warn-soft);border-radius:6px;font-size:15px}
+.sol{margin-top:12px;padding:12px 14px;background:var(--surface2);border-radius:6px}
+.sol p{margin:4px 0}
+.rate{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+.rate span{font-size:14px;color:var(--muted)}
+.rate .btn[aria-pressed="true"][data-val="ok"]{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.rate .btn[aria-pressed="true"][data-val="unsure"]{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.rate .btn[aria-pressed="true"][data-val="miss"]{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.nextskill{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;max-width:820px}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px;max-width:820px;margin-top:16px}
+.panel h2{font-size:22px;margin-bottom:6px}
+.timer{font-family:var(--f-mono);font-size:30px;font-weight:500}
+.drillq{font-family:var(--f-mono);font-size:44px;font-weight:500;margin:14px 0;overflow-wrap:anywhere}
+.drillrow{display:flex;gap:10px;flex-wrap:wrap}
+.drillrow input{font:inherit;font-family:var(--f-mono);font-size:26px;width:190px;min-height:54px;padding:0 12px;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px}
+.flash-ok{color:var(--good)}.flash-bad{color:var(--bad)}
+.stats{display:flex;flex-wrap:wrap;gap:12px 28px;margin:12px 0}
+.stats div{font-family:var(--f-mono);font-size:14px;color:var(--muted)}
+.stats b{display:block;font-size:26px;color:var(--fg);font-weight:500}
+.field{width:100%;min-height:150px;font-family:var(--f-mono);font-size:13px}
+.muted{color:var(--muted)}
+@media (max-width:560px){
+  .skill-h h1{font-size:28px}.overall .bar{width:80px}.drillq{font-size:36px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="top"><div class="top-in">
+  <a class="brand" href="#map">Quant Interview Lab</a>
+  <nav aria-label="Hauptnavigation">
+    <a href="#map" data-nav="map">Skill Map</a>
+    <a href="#drill" data-nav="drill">Kopfrechnen</a>
+    <a href="#mock" data-nav="mock">Mock-Runde</a>
+    <a href="#data" data-nav="data">Fortschritt</a>
+  </nav>
+  <div class="overall" aria-live="polite"><span id="ov-txt"></span><div class="bar"><i id="ov-bar" style="width:0%"></i></div></div>
+</div></header>
+<main id="app"></main>
+
+<script>
+(function(){
+'use strict';
+
+var DOMS={brain:'Brainteaser',game:'Spieltheorie',prob:'Wahrscheinlichkeit',fin:'Finance',skill:'Handwerk'};
+var TIERS={
+  1:['Stufe 1','Fundament','Denkmuster, die in fast jedem Interview vorkommen. Starte hier.'],
+  2:['Stufe 2','Kernmethoden','Werkzeuge für Spiele, Erwartungswerte und Beweise.'],
+  3:['Stufe 3','Interview-Spiele','Gemischte Strategien, Bluffen, Stoppen und Zustandsrechnung.'],
+  4:['Stufe 4','Anwendung und Handwerk','Märkte, Statistik, Code und das Gespräch selbst.']
+};
+function P(q,a,hint,lvl){return {q:q,a:a,hint:hint||'',lvl:lvl||1};}
+
+var SK=[
+/* ---------------- STUFE 1 ---------------- */
+{id:'pigeon',title:'Schubfachprinzip',dom:'brain',tier:1,pre:[],
+ blurb:'„Garantiert“ heißt: Worst Case bauen und eins dazuzählen.',
+ lesson:`
+ <h3>Die Idee</h3>
+ <p>Verteilst du <b>n+1</b> Objekte auf <b>n</b> Fächer, enthält mindestens ein Fach zwei Objekte. Allgemein: Damit <b>garantiert</b> ein Fach <b>m</b> Objekte enthält, brauchst du bei <b>k</b> Fächern genau <code>k·(m−1)+1</code> Objekte.</p>
+ <div class="callout"><b>Trigger im Rätsel:</b> „garantiert“, „immer“, „mindestens zwei“, „zeige, dass es zwei gibt, die …“.</div>
+ <h3>Vorgehen</h3>
+ <ol>
+  <li><b>Fächer definieren.</b> Das ist meist der ganze Trick: Farben, Monate, Reste mod n, Paare {1,2},{3,4} …</li>
+  <li><b>Worst Case bauen.</b> Der Gegner füllt jedes Fach bis m−1 und nichts landet doppelt.</li>
+  <li><b>Eins dazu.</b> Das nächste Objekt erzwingt die Doppelung.</li>
+  <li><b>Schranke scharf zeigen.</b> Mit einem Objekt weniger gibt es ein Gegenbeispiel.</li>
+ </ol>
+ <h3>Interview-Tipp</h3>
+ <p>Nenne zuerst die Fächer und ihre Anzahl, dann die Rechnung. Wer nur die Zahl sagt, bekommt die Nachfrage, warum.</p>`,
+ probs:[
+  P(`In einer dunklen Schublade liegen 10 schwarze und 10 weiße Socken. Wie viele musst du mindestens ziehen, um <b>garantiert ein schwarzes Paar</b> zu haben?`,
+    `<p><b>12.</b> Worst Case: Du ziehst zuerst alle 10 weißen, dann zwei schwarze. Für ein gleichfarbiges Paar (beliebige Farbe) wären es nur 3.</p>`,`Was ziehst du als Erstes, wenn das Pech maximal ist?`,1),
+  P(`Wie viele Personen brauchst du, damit garantiert (a) <b>drei</b> im selben Monat und (b) <b>vier</b> am selben Kalendertag (365 Tage) Geburtstag haben?`,
+    `<p>(a) 12·2+1 = <b>25</b>. (b) 365·3+1 = <b>1096</b>.</p><p>Beides ist <code>k·(m−1)+1</code> mit k = Anzahl Fächer, m = gewünschte Anzahl pro Fach.</p>`,`Der Gegner füllt jedes Fach bis m−1.`,1),
+  P(`Du wählst 51 verschiedene Zahlen aus {1,…,100}. Zeige: Darunter sind zwei <b>aufeinanderfolgende</b> Zahlen. Gilt das auch mit 50 Zahlen?`,
+    `<p><b>Fächer:</b> {1,2}, {3,4}, …, {99,100}, das sind 50 Fächer. 51 Zahlen erzwingen zwei im selben Fach, und die sind aufeinanderfolgend.</p><p><b>Mit 50 nicht:</b> alle ungeraden Zahlen 1,3,…,99 haben kein aufeinanderfolgendes Paar. Die Schranke ist scharf.</p>`,`Teile 1 bis 100 in 50 Paare.`,2),
+  P(`Du wählst 51 verschiedene Zahlen aus {1,…,100}. Zeige: Eine der Zahlen <b>teilt</b> eine andere.`,
+    `<p>Schreibe jede Zahl als <code>2^k · m</code> mit m ungerade. Es gibt 50 ungerade m (1,3,…,99). Das sind die <b>Fächer</b>: Fach m enthält alle m·2^k ≤ 100.</p><p>51 Zahlen erzwingen zwei im selben Fach: m·2^a und m·2^b mit a &lt; b. Dann gilt m·2^a teilt m·2^b.</p>`,`Fächer = der ungerade Anteil der Zahl.`,3),
+  P(`Auf einer Party mit n ≥ 2 Personen: Zeige, dass zwei Personen <b>gleich viele Bekannte</b> auf der Party haben (Bekanntschaft ist gegenseitig).`,
+    `<p>Mögliche Bekanntenzahlen: 0,…,n−1 (n Werte) für n Personen. Aber 0 und n−1 können nicht beide auftreten: Wer alle kennt, kennt auch die Person mit 0 Bekannten.</p><p>Also nur n−1 mögliche Werte für n Personen: Schubfachprinzip.</p>`,`Welche zwei Werte schließen sich aus?`,3),
+  P(`Zeige: Unter 6 Personen gibt es immer drei, die sich <b>gegenseitig kennen</b>, oder drei, die sich <b>gegenseitig fremd</b> sind.`,
+    `<p>Wähle Person A. Die anderen 5 sind je „Bekannter“ oder „Fremder“ von A. Mit 2 Fächern und 5 Personen sind es mindestens 3 mit gleichem Typ (2·2+1 = 5).</p><p>Angenommen B, C, D sind Bekannte von A. Kennen sich zwei von ihnen, bilden sie mit A ein Bekannten-Dreieck. Sonst sind B, C, D gegenseitig fremd. Fremde-Fall symmetrisch.</p>`,`Schubfach auf die Beziehung zu einer festen Person.`,3)
+ ]},
+
+{id:'invariant',title:'Invarianten, Parität, Färbung',dom:'brain',tier:1,pre:[],
+ blurb:'Zeige Unmöglichkeit durch eine Größe, die sich nie ändert.',
+ lesson:`
+ <h3>Die Idee</h3>
+ <p>Wird ein Zustand wiederholt verändert und du sollst zeigen, dass ein anderer Zustand <b>unerreichbar</b> ist, suche eine Größe, die sich bei jedem Zug nicht ändert (Invariante) oder nur in ihrer Parität gleich bleibt.</p>
+ <h3>Werkzeuge</h3>
+ <ul>
+  <li><b>Parität:</b> gerade/ungerade. Summen, Anzahlen, Permutationen.</li>
+  <li><b>Färbung:</b> Schachbrett-Färbung; jedes Domino deckt eine Farbe je einmal ab.</li>
+  <li><b>Restklassen:</b> mod 3, mod 4 …, wenn Parität nicht reicht.</li>
+  <li><b>Halbinvariante:</b> eine Größe, die nur wachsen (oder nur fallen) kann, zeigt Terminierung.</li>
+ </ul>
+ <div class="callout"><b>Trigger:</b> „Kann man …?“, „ist es möglich …?“, wiederholte Züge, Münzen umdrehen, Felder belegen.</div>
+ <h3>Vorgehen</h3>
+ <ol><li>Zwei bis drei Züge probieren.</li><li>Fragen: Was ändert sich nie? Was ändert sich immer um denselben Betrag?</li><li>Anfangs- und Zielzustand bezüglich der Invariante vergleichen.</li></ol>`,
+ probs:[
+  P(`Ein 8×8-Schachbrett, zwei <b>gegenüberliegende Ecken</b> entfernt. Kann man die 62 Felder lückenlos mit 31 Dominosteinen (2×1) belegen?`,
+    `<p><b>Nein.</b> Gegenüberliegende Ecken haben dieselbe Farbe, es bleiben 32 Felder einer und 30 der anderen Farbe. Jedes Domino deckt je ein Feld beider Farben ab, also braucht man gleich viele.</p>`,`Färbe das Brett wie ein Schachbrett.`,1),
+  P(`Kann in einer Gruppe von 7 Personen jede genau 3 andere per Handschlag begrüßt haben?`,
+    `<p><b>Nein.</b> Die Summe aller Handschlag-Enden wäre 7·3 = 21. Jeder Handschlag hat 2 Enden, die Summe muss gerade sein.</p>`,`Zähle die Enden aller Handschläge.`,1),
+  P(`10 Münzen liegen mit Kopf nach oben. In jedem Zug drehst du <b>genau zwei</b> beliebige Münzen um. Kannst du erreichen, dass genau <b>eine</b> Münze Zahl zeigt?`,
+    `<p><b>Nein.</b> Die Zahl der Zahl-Münzen ändert sich in jedem Zug um −2, 0 oder +2. Sie startet bei 0 (gerade) und bleibt gerade. Genau eine wäre ungerade.</p>`,`Wie verändert ein Zug die Anzahl der Zahl-Münzen?`,2),
+  P(`Auf einer Tafel stehen die Zahlen 1 bis 10. Du ersetzt wiederholt zwei Zahlen a, b durch |a−b|, bis eine Zahl übrig ist. Kann das Ergebnis 0 sein?`,
+    `<p><b>Nein.</b> |a−b| hat dieselbe Parität wie a+b. Damit bleibt die Parität der Gesamtsumme in jedem Zug gleich. Die Summe 1+…+10 = 55 ist ungerade, also ist die letzte Zahl ungerade und nie 0.</p>`,`Vergleiche die Parität von |a−b| mit der von a+b.`,2)
+ ]},
+
+{id:'backward',title:'Rückwärtsdenken',dom:'game',tier:1,pre:[],
+ blurb:'Löse das Ende zuerst: Gewinn- und Verluststellungen.',
+ lesson:`
+ <h3>Die Idee</h3>
+ <p>In endlichen Spielen mit Zügen nacheinander löst du die letzte Entscheidung zuerst und gehst dann rückwärts. Ein Spieler wählt in jeder Lage, was für ihn ab dort am besten ist (Teilspielperfektheit).</p>
+ <h3>Gewinn- und Verluststellungen</h3>
+ <ul>
+  <li>Eine Stellung ist <b>Verlust</b> (für den, der am Zug ist), wenn jeder Zug in eine Gewinnstellung führt.</li>
+  <li>Sie ist <b>Gewinn</b>, wenn ein Zug in eine Verluststellung führt.</li>
+ </ul>
+ <p>Bei „nimm 1 bis k Steine, wer den letzten nimmt, gewinnt“ sind die Verluststellungen die Vielfachen von <code>k+1</code>. Strategie: Nach dem Zug des Gegners antwortest du so, dass beide Züge zusammen k+1 ergeben.</p>
+ <div class="callout"><b>Misère-Variante</b> (wer den letzten nimmt, verliert): Verschiebe die Verluststellungen um 1, sie sind dann ≡ 1 mod (k+1).</div>
+ <h3>Typische Fehler</h3>
+ <ul><li>Vorwärts argumentieren („wenn ich … dann vielleicht …“) statt am Ende anzufangen.</li><li>Nur die Antwort sagen, aber nicht die Invariante („immer so antworten, dass …“).</li></ul>`,
+ probs:[
+  P(`Ein Haufen hat 21 Steine. Abwechselnd nimmt man 1, 2 oder 3 Steine. Wer den <b>letzten</b> Stein nimmt, <b>gewinnt</b>. Du beginnst. Wie spielst du?`,
+    `<p>Verluststellungen: 4, 8, 12, … (Vielfache von 4). Du nimmst <b>1</b> (20 bleiben) und antwortest danach auf jeden Zug des Gegners mit 4 minus seinem Zug.</p>`,`Finde zuerst, bei welchen Haufengrößen der Spieler am Zug verliert.`,1),
+  P(`Ein Haufen hat 30 Steine, man nimmt 1 bis 4 Steine. Wer den <b>letzten</b> Stein nimmt, <b>verliert</b>. Du beginnst. Wie spielst du?`,
+    `<p>Wer am Zug ist und 1 Stein sieht, verliert. Verluststellungen: n ≡ 1 mod 5 (1, 6, 11, …, 26). Du nimmst <b>4</b> (26 bleiben) und antwortest dann mit 5 minus seinem Zug, bis 1 Stein übrig ist.</p>`,`Welche Stellung ist die „letzte Falle“?`,2),
+  P(`Ultimatum-Spiel: A schlägt vor, 100 € zu teilen. B nimmt an (beide bekommen ihren Anteil) oder lehnt ab (beide 0). Was sagt die Rückwärtsinduktion? Was passiert in der Praxis?`,
+    `<p>B nimmt jedes Angebot &gt; 0 an (besser als 0). Also bietet A fast nichts an, z. B. 99 : 1.</p><p>In Experimenten werden Angebote unter etwa 20 bis 30 % oft abgelehnt, typische Angebote liegen bei 40 bis 50 %. Rationalität in der Theorie und Fairness in der Praxis weichen ab.</p>`,`Was ist Bs beste Antwort auf jedes Angebot?`,2),
+  P(`<b>Piratenspiel:</b> 5 Piraten (A bis E, A ist der Ranghöchste) teilen 100 Goldmünzen. Der Ranghöchste schlägt eine Verteilung vor, alle stimmen ab. Bei mindestens 50 % Zustimmung (auch seiner eigenen Stimme) wird sie angenommen, sonst wird er über Bord geworfen und der Nächste ist dran. Jeder Pirat will überleben, dann möglichst viel Gold, dann möglichst viele Konkurrenten loswerden. Was schlägt A vor?`,
+    `<p>Rückwärts:</p><ul><li>D, E: D schlägt (100, 0) vor, seine eigene Stimme reicht (1 von 2).</li><li>C, D, E: C braucht 2 Stimmen. Er gibt E 1 Münze (E bekäme sonst 0): <b>(99, 0, 1)</b>.</li><li>B, C, D, E: B braucht 2 Stimmen. Er gibt D 1: <b>(99, 0, 1, 0)</b>.</li><li>A, B, C, D, E: A braucht 3 Stimmen. Er gibt C und E je 1 (sie bekämen sonst 0).</li></ul><p><b>A: 98, B: 0, C: 1, D: 0, E: 1.</b></p>`,`Beginne mit nur 2 Piraten und füge einen nach dem anderen hinzu.`,3)
+ ]},
+
+{id:'counting',title:'Kombinatorik und Zählen',dom:'prob',tier:1,pre:[],
+ blurb:'Multiplikationsregel, Binomialkoeffizienten, Komplement.',
+ lesson:`
+ <h3>Werkzeugkasten</h3>
+ <ul>
+  <li><b>Multiplikationsregel:</b> Schritte hintereinander: Möglichkeiten multiplizieren.</li>
+  <li><b>Permutationen:</b> n! Anordnungen von n verschiedenen Dingen.</li>
+  <li><b>Auswahl:</b> <code>C(n,k) = n! / (k!(n−k)!)</code> (Reihenfolge egal).</li>
+  <li><b>Sterne und Balken:</b> n gleiche Dinge auf k Gruppen verteilen (leer erlaubt): <code>C(n+k−1, k−1)</code>.</li>
+  <li><b>Komplement:</b> „mindestens ein“ = 1 − „keiner“.</li>
+  <li><b>Gleichwertige Zählweise:</b> Zähle dieselbe Menge auf zwei Arten, die Ergebnisse müssen gleich sein.</li>
+ </ul>
+ <div class="callout"><b>Interview-Muster:</b> Bei Wahrscheinlichkeiten erst fragen: Sind alle Ergebnisse gleich wahrscheinlich? Dann ist P = günstige / mögliche.</div>
+ <h3>Schnelle Werte</h3>
+ <div class="tablewrap"><table><tr><th>n</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>10</th></tr><tr><td>n!</td><td>1</td><td>2</td><td>6</td><td>24</td><td>120</td><td>720</td><td>5040</td><td>40320</td><td>3628800</td></tr></table></div>`,
+ probs:[
+  P(`Wie viele kürzeste Wege gibt es in einem 5×5-Gitter von links unten nach rechts oben (nur nach rechts oder oben)?`,
+    `<p>Jeder Weg besteht aus 5 Schritten nach rechts und 5 nach oben, also 10 Schritte. Wähle, welche 5 davon „rechts“ sind: <code>C(10,5) = <b>252</b></code>.</p>`,`Welche Entscheidung legt den Weg fest?`,1),
+  P(`Wie viele Spiele gibt es in einem K.-o.-Turnier mit 20 Teams (eine Niederlage heißt ausgeschieden)?`,
+    `<p><b>19.</b> Jedes Spiel eliminiert genau ein Team, und am Ende bleibt eines übrig. Das ist eine Invariante: Teams − Spiele = 1 am Ende.</p>`,`Zähle Ausgeschiedene statt Spiele.`,1),
+  P(`Auf wie viele Arten kann man 10 gleiche Bonbons an 4 Kinder verteilen (ein Kind darf leer ausgehen)?`,
+    `<p>Sterne und Balken: 10 Sterne, 3 Trennwände: <code>C(13,3) = <b>286</b></code>.</p>`,`n+k−1 über k−1.`,2),
+  P(`Wie wahrscheinlich ist es, dass unter 23 Personen mindestens zwei am selben Tag Geburtstag haben (365 Tage, gleichverteilt)?`,
+    `<p>Komplement: 1 − (365/365 · 364/365 · … · 343/365) ≈ <b>50,7 %</b>.</p><p>Faustregel: Bei 23 Personen gibt es 253 Paare, jedes trifft mit 1/365. Erwartet sind 253/365 ≈ 0,69 Treffer, und 1 − e^(−0,69) ≈ 50 %. Die Schwelle liegt bei etwa √(2·365·ln 2) ≈ 22,5.</p>`,`Rechne die Wahrscheinlichkeit, dass alle verschieden sind.`,2)
+ ]},
+
+{id:'probbasics',title:'Bedingte Wahrscheinlichkeit und Bayes',dom:'prob',tier:1,pre:['counting'],
+ blurb:'Stichprobenraum sauber definieren, Bayes mit natürlichen Häufigkeiten.',
+ lesson:`
+ <h3>Formeln</h3>
+ <p><code>P(A|B) = P(A∩B) / P(B)</code> und Bayes: <code>P(A|B) = P(B|A)·P(A) / P(B)</code>.</p>
+ <h3>Natürliche Häufigkeiten</h3>
+ <p>Stelle dir 10 000 Personen vor und zähle durch. Das ersetzt Formeln und verhindert den Fehler, die Basisrate zu vergessen.</p>
+ <div class="callout"><b>Die häufigste Falle:</b> Der Stichprobenraum. „Mindestens ein Mädchen“ und „das ältere ist ein Mädchen“ sind verschiedene Informationen und geben verschiedene Antworten.</div>
+ <h3>Vorgehen</h3>
+ <ol><li>Alle gleich wahrscheinlichen Fälle aufschreiben.</li><li>Streiche die, die zur Information nicht passen.</li><li>Zähle günstige Fälle unter den übrigen.</li></ol>`,
+ probs:[
+  P(`<b>Monty Hall:</b> 3 Türen, hinter einer ein Auto. Du wählst Tür 1, der Moderator (der weiß, wo das Auto steht) öffnet eine Ziegen-Tür. Wechseln oder bleiben?`,
+    `<p><b>Wechseln: 2/3.</b> Deine erste Wahl ist mit Wahrscheinlichkeit 1/3 richtig. Wechseln gewinnt genau dann, wenn die erste Wahl falsch war: 2/3.</p>`,`Wann gewinnt Wechseln?`,1),
+  P(`Eine Familie hat zwei Kinder, mindestens eines ist ein Mädchen. Wie wahrscheinlich sind <b>beide</b> Mädchen? Und wenn das <b>ältere</b> ein Mädchen ist?`,
+    `<p>Gleich wahrscheinliche Fälle: MM, MJ, JM, JJ. Bei „mindestens ein Mädchen“ bleiben MM, MJ, JM: <b>1/3</b>. Bei „das ältere ist ein Mädchen“ bleiben MM, MJ: <b>1/2</b>.</p>`,`Schreibe alle vier Fälle auf.`,1),
+  P(`Eine Krankheit hat Häufigkeit 1 %. Der Test erkennt Kranke zu 99 % (Sensitivität) und Gesunde zu 95 % (Spezifität). Du bist positiv. Wie wahrscheinlich bist du krank?`,
+    `<p>10 000 Personen: 100 krank, davon 99 positiv. 9900 gesund, davon 5 % = 495 falsch positiv. P = 99/(99+495) = <b>1/6 ≈ 16,7 %</b>.</p>`,`Nimm 10 000 Personen.`,2),
+  P(`Zwei Münzen: eine fair, eine mit zwei Köpfen. Du wählst zufällig eine, wirfst sie und siehst Kopf. Wie wahrscheinlich ist es die Doppelkopf-Münze?`,
+    `<p>P(Kopf) = ½·1 + ½·½ = ¾. P(Doppelkopf und Kopf) = ½. Also (½)/(¾) = <b>2/3</b>.</p><p>Gleich wahrscheinliche Seiten: 3 Köpfe, davon 2 auf der Doppelkopf-Münze.</p>`,`Zähle die Kopf-Seiten.`,2)
+ ]},
+
+{id:'mental',title:'Kopfrechnen und Fermi-Schätzungen',dom:'skill',tier:1,pre:[],
+ blurb:'Rechentricks und Größenordnungen. Dazu ein Speed-Training.',
+ lesson:`
+ <h3>Rechentricks</h3>
+ <ul>
+  <li><b>Zerlegen:</b> 47·23 = 47·20 + 47·3 = 940 + 141 = 1081.</li>
+  <li><b>Quadrate:</b> (50−3)² = 2500 − 300 + 9 = 2209. Endet n auf 5: n² = (Zehner)·(Zehner+1) angehängt an 25 (65² = 4225).</li>
+  <li><b>×5, ×25, ×11:</b> ×5 = ×10 : 2; ×25 = ×100 : 4; ×11 = Zahl + Zahl um eine Stelle verschoben.</li>
+  <li><b>Prozent:</b> 15 % = 10 % + 5 %.</li>
+  <li><b>Brüche:</b> 1/7 = 0,142857; 1/8 = 0,125; 1/9 = 0,111…; 1/6 = 0,1667.</li>
+  <li><b>Regel der 72:</b> Verdopplungszeit ≈ 72 / Zins in %.</li>
+ </ul>
+ <h3>Fermi-Schätzung</h3>
+ <ol>
+  <li>Zerlege in Faktoren, die du kennst.</li><li>Runde auf Zehnerpotenzen oder einfache Zahlen.</li><li>Fehler gleichen sich oft aus, nur grobe Fehler zählen.</li><li>Prüfe die Größenordnung am Ende mit einer zweiten Route.</li>
+ </ol>
+ <p>Nützliche Größen: Deutschland ca. 84 Mio. Einwohner, ein Jahr ca. 3,15·10⁷ Sekunden, ein Arbeitsjahr ca. 2000 Stunden.</p>
+ <div class="readrow"><a class="btn primary small" href="#drill">Zum Kopfrechen-Training</a></div>`,
+ probs:[
+  P(`Rechne im Kopf: 47 · 23.`,`<p><b>1081.</b> 47·20 = 940, 47·3 = 141.</p>`,`Zerlege 23 in 20 + 3.`,1),
+  P(`Wie lange dauert es, bis sich Geld bei 6 % Zins pro Jahr ungefähr verdoppelt?`,`<p>Regel der 72: 72/6 = <b>12 Jahre</b> (exakt 11,9).</p>`,'',1),
+  P(`Wie viele Sekunden hat ein Jahr (Größenordnung)?`,`<p>365 · 86 400 = 31,5 Mio. ≈ <b>3,15·10⁷</b>. Merkregel: π·10⁷.</p>`,`Sekunden pro Tag: 24·3600.`,1),
+  P(`Fermi: Wie viele Klavierstimmer gibt es in Berlin?`,`<p>Beispielrechnung: 3,7 Mio. Einwohner ≈ 1,8 Mio. Haushalte. Etwa 1 von 20 hat ein Klavier: ≈ 90 000 Klaviere. Jedes wird ca. 1× pro Jahr gestimmt: 90 000 Stimmungen. Ein Stimmer schafft ca. 3 pro Tag an 200 Tagen = 600 pro Jahr. Ergebnis ≈ <b>150 Stimmer</b>.</p><p>Es zählt die saubere Struktur, nicht die Zahl. Nenne am Ende, welche Annahme am unsichersten ist.</p>`,`Haushalte → Klaviere → Stimmungen pro Jahr → Kapazität pro Stimmer.`,2)
+ ]},
+
+/* ---------------- STUFE 2 ---------------- */
+{id:'symmetry',title:'Symmetrie und Strategy-Stealing',dom:'brain',tier:2,pre:['backward'],
+ blurb:'Spiegeln, Strategie „stehlen“, Gleichwertigkeit nutzen.',
+ lesson:`
+ <h3>Spiegelstrategie</h3>
+ <p>Hat ein Spiel eine Symmetrie (Punktspiegelung am Mittelpunkt), kann ein Spieler jeden Zug des Gegners spiegeln. Wer zuletzt spiegeln kann, gewinnt. Meist nimmt der Erste den Mittelpunkt und spiegelt dann.</p>
+ <h3>Strategy-Stealing</h3>
+ <p>Annahme: Der Zweite hätte eine Gewinnstrategie. Dann macht der Erste einen beliebigen Zug und „spielt“ ab da die Rolle des Zweiten. Ein Extrazug schadet nicht (in Spielen, in denen das gilt). Also gewinnt oder remisiert der Erste mindestens. Dieser Beweis zeigt, <b>dass</b> eine Strategie existiert, nicht <b>welche</b>.</p>
+ <h3>Symmetrie in Wahrscheinlichkeit</h3>
+ <p>Austauschbare Größen haben gleiche Verteilung. Beispiel: Die zweite Karte eines gemischten Decks ist so oft ein Ass wie die erste.</p>`,
+ probs:[
+  P(`Runder Tisch, zwei Spieler legen abwechselnd gleiche Münzen so, dass keine überlappt und keine über den Tischrand ragt. Wer nicht mehr legen kann, verliert. Wer gewinnt, und wie?`,
+    `<p><b>Der Erste.</b> Er legt die erste Münze in die Mitte. Danach legt er jede Münze punktgespiegelt zum Zug des Gegners. Ist der Platz des Gegners frei, ist der gespiegelte auch frei.</p>`,`Welcher Punkt ist Symmetriezentrum?`,1),
+  P(`<b>Chomp:</b> Eine rechteckige Schokoladentafel m×n (nicht 1×1), das Eckstück unten links ist vergiftet. Abwechselnd wählt man ein Stück und isst es mit allem rechts und oberhalb davon. Wer das vergiftete Stück essen muss, verliert. Wer gewinnt?`,
+    `<p><b>Der Erste.</b> Strategy-Stealing: Angenommen, der Zweite hat eine Gewinnstrategie. Der Erste isst das Stück oben rechts. Die Antwort des Zweiten darauf hätte der Erste schon im ersten Zug spielen können. Widerspruch. Also gewinnt der Erste (die Strategie selbst ist unbekannt).</p>`,`Was passiert, wenn der Erste nur das Eckstück oben rechts isst?`,3),
+  P(`Zwei Spieler würfeln je einmal mit einem fairen Würfel. Wie wahrscheinlich ist es, dass A eine <b>höhere</b> Zahl hat als B?`,
+    `<p>Symmetrie: P(A&gt;B) = P(B&gt;A). Gleichstand: 6/36 = 1/6. Also (1 − 1/6)/2 = <b>5/12</b>.</p>`,`Wie oft ist es A, wie oft B?`,1),
+  P(`Ein Kartenspiel (52 Karten) wird gemischt. Wie wahrscheinlich ist die <b>zweite</b> Karte ein Ass, wenn du nichts über die erste weißt?`,
+    `<p><b>1/13.</b> Jede Position im gemischten Deck ist gleichwertig. Die Bedingung auf die erste Karte brauchst du nicht.</p>`,'',1)
+ ]},
+
+{id:'smallcases',title:'Kleine Fälle, Induktion, Extremalprinzip',dom:'brain',tier:2,pre:['pigeon'],
+ blurb:'Muster aus n = 1, 2, 3 ablesen, dann begründen.',
+ lesson:`
+ <h3>Ablauf</h3>
+ <ol>
+  <li><b>Kleine Fälle:</b> n = 1, 2, 3, 4 ausrechnen.</li>
+  <li><b>Muster vermuten.</b></li>
+  <li><b>Begründen:</b> Rekursion („was ändert sich, wenn n um 1 wächst?“) oder Induktion.</li>
+ </ol>
+ <h3>Extremalprinzip</h3>
+ <p>Betrachte das größte, kleinste oder nächstliegende Objekt. Dort gelten oft Bedingungen, die im Inneren fehlen.</p>
+ <h3>Weitere Griffe</h3>
+ <ul><li>Verallgemeinern oder spezialisieren.</li><li>Eine Zahl auf 0, 1 oder ∞ schicken (Grenzfälle).</li><li>Rückwärts denken (siehe Rückwärtsdenken).</li></ul>`,
+ probs:[
+  P(`<b>100 Türen:</b> Alle geschlossen. In Runde k wird der Zustand jeder k-ten Tür umgeschaltet (k = 1,…,100). Welche Türen sind am Ende offen?`,
+    `<p>Tür n wird einmal pro Teiler von n umgeschaltet. Offen ist sie, wenn n eine <b>ungerade Anzahl</b> Teiler hat. Das gilt nur für Quadratzahlen: 1, 4, 9, …, 100. Das sind <b>10 Türen</b>.</p>`,`Wie oft wird Tür 12 umgeschaltet? Tür 16?`,1),
+  P(`Wie viele Stücke entstehen höchstens, wenn man eine Pizza mit n geraden Schnitten teilt? Für n = 10?`,
+    `<p>n = 0,1,2,3,4: 1, 2, 4, 7, 11. Der n-te Schnitt kreuzt höchstens n−1 frühere und erzeugt n neue Stücke. Also <code>1 + n(n+1)/2</code>. Für n = 10: <b>56</b>.</p>`,`Wie viele neue Stücke bringt der n-te Schnitt?`,2),
+  P(`<b>Zwei Eier:</b> Ein Gebäude hat 100 Stockwerke. Ab einem Stockwerk zerbricht ein Ei beim Fall, darunter nicht. Du hast zwei Eier. Wie viele Würfe braucht man im Worst Case mindestens, um das Stockwerk zu finden?`,
+    `<p><b>14.</b> Erster Wurf aus Stock 14, bei Überleben dann 27 (+13), 39 (+12), … Die Abstände schrumpfen, weil jeder Wurf einen weniger für das lineare Suchen mit dem zweiten Ei lässt. 14+13+…+1 = 105 ≥ 100.</p>`,`Der erste Wurf soll im Worst Case denselben Gesamtaufwand haben wie jeder spätere.`,3)
+ ]},
+
+{id:'ev',title:'Erwartungswert und Linearität',dom:'prob',tier:2,pre:['probbasics'],
+ blurb:'Indikatorvariablen, Linearität, Bedingen auf den ersten Schritt.',
+ lesson:`
+ <h3>Linearität</h3>
+ <p><code>E[X+Y] = E[X]+E[Y]</code> gilt immer, auch bei Abhängigkeit. Das ist das stärkste Werkzeug.</p>
+ <h3>Indikatorvariablen</h3>
+ <p>Zähle Erfolge als Summe von 0-1-Variablen: E[Anzahl] = Summe der Einzel-Wahrscheinlichkeiten.</p>
+ <h3>Weitere Standardwerte</h3>
+ <ul><li>Geometrisch: Erwartete Versuche bis zum ersten Erfolg = 1/p.</li><li>Bedingen: <code>E[X] = Σ E[X|Fall]·P(Fall)</code>.</li></ul>
+ <div class="callout"><b>Warnung:</b> Der Erwartungswert ist keine Entscheidungsregel. Bei Risiko zählen Varianz, Bankroll und Kelly.</div>`,
+ probs:[
+  P(`Eine Permutation von n Karten wird zufällig gemischt. Wie viele Karten liegen im Erwartungswert wieder an ihrem Ausgangsplatz?`,
+    `<p>Indikator je Karte: P(Karte i an Platz i) = 1/n. Summe: n·(1/n) = <b>1</b>, unabhängig von n.</p>`,`Indikator pro Karte.`,1),
+  P(`Wie viele Würfe eines fairen Würfels braucht man im Mittel bis zur ersten 6?`,`<p><b>6</b> (geometrisch, 1/p mit p = 1/6).</p>`,'',1),
+  P(`<b>Coupon Collector:</b> Du sammelst 6 verschiedene Figuren, jede Packung enthält zufällig eine. Wie viele Packungen im Mittel, bis du alle hast?`,
+    `<p>Nach k gesammelten warten ca. 6/(6−k) Packungen. Summe: 6·(1 + 1/2 + 1/3 + 1/4 + 1/5 + 1/6) = 6·2,45 = <b>14,7</b>.</p>`,`Zerlege nach „wie viele fehlen noch“.`,2),
+  P(`<b>St. Petersburg:</b> Eine faire Münze wird bis zum ersten Kopf geworfen. Fällt Kopf im k-ten Wurf, bekommst du 2^k €. Was ist der Erwartungswert, und was würdest du zahlen?`,
+    `<p>Jedes k trägt 2^k·2^(−k) = 1 bei. Die Summe ist unendlich. Praktisch zahlt niemand viel: begrenzte Bank (bei Auszahlung bis 2²⁰ ≈ 1 Mio. sind es nur ≈ 21 €), abnehmender Grenznutzen oder Kelly-Kriterium.</p><p>Lehre: Erwartungswert ist nicht automatisch Entscheidungsregel.</p>`,'',2)
+ ]},
+
+{id:'gtbasics',title:'Normalform, Dominanz, Nash',dom:'game',tier:2,pre:['backward'],
+ blurb:'Auszahlungsmatrizen lesen, Dominanz eliminieren, Gleichgewicht prüfen.',
+ lesson:`
+ <h3>Begriffe</h3>
+ <ul>
+  <li><b>Normalform:</b> Matrix mit Auszahlungen (Zeilenspieler, Spaltenspieler).</li>
+  <li><b>Dominierte Strategie:</b> Immer schlechter als eine andere. Streichen, dann wiederholen (iterierte Dominanz).</li>
+  <li><b>Nash-Gleichgewicht:</b> Niemand kann sich durch einseitiges Abweichen verbessern.</li>
+  <li><b>Nullsummenspiele:</b> Sattelpunkt, wenn größtes Zeilenminimum = kleinstes Spaltenmaximum. Sonst gemischte Strategie.</li>
+ </ul>
+ <div class="callout"><b>Prüfschema für Nullsumme:</b> 1) Dominanz streichen, 2) Sattelpunkt prüfen, 3) erst dann mischen.</div>
+ <h3>Gefangenendilemma</h3>
+ <p>Individuell rationales Verhalten führt zu einem schlechteren Ergebnis für beide. Nash-Gleichgewicht ist nicht automatisch Pareto-optimal.</p>`,
+ probs:[
+  P(`Gefangenendilemma: Beide schweigen: (−1, −1). Einer gesteht, der andere schweigt: Geständiger 0, Schweiger −10. Beide gestehen: (−5, −5). Was ist das Nash-Gleichgewicht?`,
+    `<p>Gestehen ist dominant (0 &gt; −1 und −5 &gt; −10). Nash: <b>(Gestehen, Gestehen)</b> mit (−5, −5), obwohl (Schweigen, Schweigen) beide besser stellt.</p>`,`Was ist die beste Antwort auf Schweigen? Auf Gestehen?`,1),
+  P(`Auszahlungen an A (Nullsumme): Zeile 1: [3, 1], Zeile 2: [2, 0]. Gibt es einen Sattelpunkt? Wie lautet der Spielwert?`,
+    `<p>Zeilenminima: 1 und 0, Maximum davon 1. Spaltenmaxima: 3 und 1, Minimum davon 1. Gleich: <b>Sattelpunkt</b> bei (Zeile 1, Spalte 2), Wert <b>1</b>. Zeile 2 ist außerdem dominiert.</p>`,'',1),
+  P(`<b>⅔ des Durchschnitts:</b> Alle Spieler nennen eine Zahl zwischen 0 und 100. Gewinner ist, wer am nächsten an ⅔ des Durchschnitts liegt. Was ist das Nash-Gleichgewicht, und was nennst du?`,
+    `<p>Zahlen über 66,7 sind dominiert (der Durchschnitt kann ⅔·100 nicht überschreiten). Danach ≤ 44,4, dann ≤ 29,6 usw. Grenzwert: <b>0</b> ist das Gleichgewicht.</p><p>In der Praxis liegt der Durchschnitt bei 20 bis 35 (Level-k-Denken). Im Interview sagst du beides: Gleichgewicht 0, und du setzt bei der Gruppe auf 2 bis 3 Denkstufen.</p>`,`Welche Zahlen sind sicher zu hoch?`,2),
+  P(`<b>Battle of the Sexes:</b> Zeilenspieler wählt Oper (O) oder Fußball (F), Spaltenspieler ebenso. (O,O) = (2,1), (F,F) = (1,2), Nichtübereinstimmung (0,0). Finde alle Gleichgewichte.`,
+    `<p>Reine: <b>(O,O)</b> und <b>(F,F)</b>. Gemischt: Zeile spielt O mit p, so dass Spalte indifferent ist: p·1 = (1−p)·2 → p = 2/3. Spalte spielt O mit q, so dass Zeile indifferent ist: 2q = (1−q) → q = 1/3. Auszahlung jeweils 2/3.</p>`,`Mache jeweils den anderen indifferent.`,3)
+ ]},
+
+/* ---------------- STUFE 3 ---------------- */
+{id:'mixed',title:'Indifferenzprinzip und gemischte Strategien',dom:'game',tier:3,pre:['gtbasics','ev'],
+ blurb:'Mache den Gegner indifferent, lies den Spielwert ab.',
+ lesson:`
+ <h3>Die Idee</h3>
+ <p>Bei gleichzeitigen Zügen (Schere-Stein-Papier-Typ) ist jede feste Strategie ausnutzbar. Du randomisierst so, dass der <b>Gegner indifferent</b> ist: Egal was er spielt, sein Erwartungswert ist gleich.</p>
+ <h3>Rezept (2×2)</h3>
+ <ol><li>Dominanz und Sattelpunkt prüfen.</li><li>p = Wahrscheinlichkeit für deine erste Option.</li><li>Deinen Erwartungswert gegen jede Gegneroption aufschreiben.</li><li>Gleichsetzen, nach p lösen.</li><li>p einsetzen: Spielwert.</li><li>Kontrolle von der anderen Seite.</li></ol>
+ <h3>Beispiel</h3>
+ <p>Auszahlung an A: Zeile 1 = [3, −1], Zeile 2 = [−2, 1]. Kein Sattelpunkt. Gegen B1: 5p−2, gegen B2: 1−2p. Gleichsetzen: p = 3/7, Wert 1/7.</p>
+ <h3>Abkürzung für [[a,b],[c,d]]</h3>
+ <p><code>p = (d−c)/(a−b−c+d)</code> und Wert <code>v = (ad−bc)/(a−b−c+d)</code>, wenn kein Sattelpunkt existiert.</p>
+ <div class="callout"><b>Typischer Fehler:</b> die eigenen Auszahlungen gleichsetzen statt die Auszahlungen <b>gegen jede Gegneroption</b>.</div>
+ <p>Bei einem symmetrischen (schiefsymmetrischen) Spiel ist der Wert 0.</p>`,
+ probs:[
+  P(`Auszahlung an A (Nullsumme): Zeile 1 = [2, −1], Zeile 2 = [−3, 1]. Sattelpunkt? Optimales p für A, Spielwert, und wer hat den Vorteil?`,
+    `<p>Zeilenminima −1, −3 → −1. Spaltenmaxima 2, 1 → 1. Kein Sattelpunkt.</p><p>Gegen B1: 2p − 3(1−p) = 5p − 3. Gegen B2: −p + (1−p) = 1 − 2p. Gleich: 7p = 4, <b>p = 4/7</b>. Wert = 1 − 8/7 = <b>−1/7</b>.</p><p>Kontrolle von B aus: q = 2/7, Wert ebenfalls −1/7. <b>B hat den Vorteil</b>, A würde das Spiel besser nicht spielen.</p>`,`Auszahlungen gegen B1 und gegen B2 gleichsetzen.`,1),
+  P(`Auszahlung an A: Zeile 1 = [1, 4], Zeile 2 = [3, 2]. Löse mit der Abkürzung und prüfe.`,
+    `<p>Kein Sattelpunkt (Maximin 2, Minimax 3). p = (2−3)/(1−4−3+2) = <b>1/4</b>, v = (1·2−4·3)/(−4) = <b>5/2</b>.</p><p>Probe: gegen B1: 1·¼ + 3·¾ = 2,5. Gegen B2: 4·¼ + 2·¾ = 2,5.</p>`,'',2),
+  P(`Matching Pennies mit Gewichten: Beide zeigen Kopf: A bekommt 3. Beide Zahl: A bekommt 1. Verschieden: A zahlt 2. Optimale Mischung von A und Spielwert?`,
+    `<p>Matrix für A: [[3, −2], [−2, 1]]. Gegen B-Kopf: 5p−2. Gegen B-Zahl: 1−3p. Gleich: <b>p = 3/8</b>, Wert <b>−1/8</b>. B spielt ebenfalls Kopf mit 3/8.</p>`,'',2),
+  P(`<b>Modifiziertes Schere-Stein-Papier:</b> Ein Sieg mit Stein zählt 2 Punkte, jeder andere Sieg 1 Punkt (Nullsumme). Wie mischt man optimal?`,
+    `<p>Matrix für A (Zeilen/Spalten: Stein, Schere, Papier): [[0,2,−1],[−2,0,1],[1,−1,0]]. Sie ist schiefsymmetrisch: Wert 0.</p><p>Setze die Spaltenwerte auf 0: −2·S + P = 0 und 2·R − P = 0. Also P = 2S, R = S. Mit R+S+P = 1: <b>(¼, ¼, ½)</b>.</p><p>Papier (schlägt den starken Stein) wird am häufigsten gespielt.</p>`,`Schiefsymmetrisch: Spielwert 0. Dann Spalten auf 0 setzen.`,3)
+ ]},
+
+{id:'recursion',title:'Rekursion und Markov-Ketten',dom:'prob',tier:3,pre:['ev'],
+ blurb:'Auf den ersten Schritt bedingen, Zustände, Spielerruin.',
+ lesson:`
+ <h3>Methode</h3>
+ <ol><li>Zustände definieren (was muss ich mir merken?).</li><li>Für jeden Zustand E[Rest] aufschreiben: 1 Schritt + gewichteter Erwartungswert der Folgezustände.</li><li>Gleichungssystem lösen. Absorbierende Zustände haben Wert 0.</li></ol>
+ <h3>Standardresultate</h3>
+ <ul>
+  <li><b>Spielerruin, fair, ±1:</b> Start a, Ziel N: P(Ziel zuerst) = a/N, erwartete Dauer a(N−a).</li>
+  <li><b>Münzmuster:</b> erwartete Würfe bis HH = 6, bis HT = 4.</li>
+  <li><b>n Sechser in Folge:</b> (6^(n+1) − 6)/5 Würfe.</li>
+ </ul>`,
+ probs:[
+  P(`Wie viele faire Münzwürfe braucht man im Mittel bis zum ersten Mal <b>Kopf-Kopf</b> hintereinander (HH)?`,
+    `<p>Zustände: Start (E₀), nach H (E_H). E₀ = 1 + ½E_H + ½E₀. E_H = 1 + ½·0 + ½E₀.</p><p>Einsetzen: E₀ = 1 + ½(1 + ½E₀) + ½E₀ = 1,5 + 0,75E₀ → E₀ = <b>6</b>.</p>`,`Zwei Zustände genügen.`,2),
+  P(`Wie viele Würfe im Mittel bis <b>Kopf-Zahl</b> (HT)? Warum ist es weniger als bei HH?`,
+    `<p><b>4.</b> Zustände: Start (E₀) und „letzter Wurf war H“ (E_H). E_H = 1 + ½·0 + ½·E_H, also E_H = 2. E₀ = 1 + ½E_H + ½E₀, also E₀ = 4.</p><p>Warum weniger als bei HH: Bei HT bleibt der Fortschritt nach einem weiteren H erhalten (du bleibst im Zustand H). Bei HH wirft ein T dich komplett zurück an den Start.</p>`,'',2),
+  P(`Du hast 20 € und spielst eine faire Wette um ±1 € pro Runde, bis du 100 € hast oder pleite bist. Wie wahrscheinlich erreichst du 100 €, und wie lange dauert es im Mittel?`,
+    `<p>P = 20/100 = <b>20 %</b>. Erwartete Dauer: a(N−a) = 20·80 = <b>1600 Runden</b>.</p>`,`Fairer Zufallsweg ist ein Martingal.`,2),
+  P(`Wie viele Würfe eines Würfels braucht man im Mittel, bis <b>zwei Sechser in Folge</b> fallen?`,
+    `<p>Zustände 0, 1. E₀ = 1 + (1/6)E₁ + (5/6)E₀, E₁ = 1 + (5/6)E₀. Einsetzen: E₀ = 1 + (1/6)(1 + (5/6)E₀) + (5/6)E₀ → E₀(1 − 5/36 − 5/6) = 7/6 → E₀ = <b>42</b>.</p>`,'',3)
+ ]},
+
+{id:'stopping',title:'Optimal Stopping und Würfelspiele',dom:'game',tier:3,pre:['backward','ev'],
+ blurb:'Fortsetzungswert gegen Stoppwert, Sekretärsproblem.',
+ lesson:`
+ <h3>Prinzip</h3>
+ <p>Rückwärts rechnen: Der Wert des Weiterspielens (Fortsetzungswert) ist der Maßstab. Stoppe, wenn der aktuelle Wert ihn übersteigt.</p>
+ <h3>Würfelspiel mit Wiederholung</h3>
+ <p>Bei einem Wurf mit Wiederholung: Letzte Runde hat Wert 3,5. In der vorletzten behältst du, was über 3,5 liegt (4, 5, 6), sonst wirfst du neu.</p>
+ <h3>Sekretärsproblem</h3>
+ <p>n Kandidaten kommen nacheinander, du siehst nur die Rangfolge gegenüber den bisherigen und musst sofort entscheiden. Optimal: etwa die ersten n/e ≈ 37 % ablehnen, danach den ersten nehmen, der besser ist als alle bisherigen. Erfolgswahrscheinlichkeit ≈ 1/e ≈ 37 %.</p>`,
+ probs:[
+  P(`Du würfelst einen fairen Würfel und bekommst die Augenzahl in €. Nach dem ersten Wurf darfst du <b>einmal</b> neu würfeln (dann gilt der zweite Wurf). Erwarteter Gewinn?`,
+    `<p>Neuwurf hat Wert 3,5. Behalte 4, 5, 6. EV = (4+5+6)/6 + (3/6)·3,5 = 2,5 + 1,75 = <b>4,25</b>.</p>`,`Fortsetzungswert = 3,5.`,1),
+  P(`Wie vorher, aber du darfst <b>zweimal</b> neu würfeln. Erwarteter Gewinn, und was behältst du nach dem ersten Wurf?`,
+    `<p>Fortsetzungswert nach dem ersten Wurf = 4,25. Behalte nur 5 und 6. EV = (5+6)/6 + (4/6)·4,25 = 11/6 + 17/6 = 28/6 = <b>≈ 4,67</b>.</p>`,`Nutze das Ergebnis der Ein-Wiederholung als Fortsetzungswert.`,2),
+  P(`<b>Sekretärsproblem mit n = 3:</b> Beste Strategie und Erfolgswahrscheinlichkeit?`,
+    `<p>Lehne den ersten ab, nimm danach den ersten, der besser ist als der erste (sonst den letzten). Von den 6 Reihenfolgen gelingt es in 3: <b>1/2</b>. (Für großes n: ≈ 1/e ≈ 37 %.)</p>`,`Zähle die 6 Reihenfolgen.`,2),
+  P(`<b>Pig:</b> Du würfelst wiederholt. Bei einer 1 verlierst du deine gesamte Rundensumme, sonst addierst du die Augenzahl. Bis zu welcher Rundensumme würfelst du weiter (Ein-Schritt-Regel)?`,
+    `<p>Würfeln bringt im Mittel (2+3+4+5+6)/6 = 20/6 hinzu und verliert mit Wahrscheinlichkeit 1/6 die Summe t, also −t/6. Würfle weiter, solange 20 &gt; t. Daher: <b>stoppe ab 20</b>.</p>`,`Vergleiche den erwarteten Gewinn und Verlust eines weiteren Wurfs.`,2)
+ ]},
+
+{id:'bluff',title:'Bluffen und Pokerlogik',dom:'game',tier:3,pre:['mixed'],
+ blurb:'Bluffanteil und Mindestverteidigung aus dem Indifferenzprinzip.',
+ lesson:`
+ <h3>Das Spiel</h3>
+ <p>Pot = P, Einsatz = b. Spieler A hat entweder eine starke Hand oder gar nichts. Spieler B hat einen Bluff-Catcher (schlägt nur Bluffs).</p>
+ <h3>Formeln</h3>
+ <ul>
+  <li><b>Bluffanteil im Einsatz-Bereich:</b> <code>b / (P + 2b)</code>. Dann ist B indifferent beim Call.</li>
+  <li><b>Calls von B (Mindestverteidigung):</b> <code>P / (P + b)</code>. Dann ist A indifferent beim Bluff.</li>
+  <li><b>Break-even-Foldfrequenz für einen reinen Bluff:</b> <code>b / (P + b)</code>.</li>
+ </ul>
+ <p>Bei Einsatz = Pot: ein Drittel Bluffs (Value : Bluff = 2 : 1), B callt die Hälfte.</p>
+ <div class="callout"><b>Warum bluffen?</b> Ohne Bluffs foldet der Gegner jede Wette, und deine starken Hände werden nicht bezahlt.</div>`,
+ probs:[
+  P(`Pot 100, Einsatz 100. Welcher Anteil deines Einsatz-Bereichs soll Bluff sein, und wie oft muss der Gegner callen?`,
+    `<p>Bluffanteil = 100/(100+200) = <b>1/3</b>. Call-Frequenz = 100/200 = <b>1/2</b>.</p>`,'',1),
+  P(`Pot 100, Einsatz 50. Bluffanteil und Call-Frequenz?`,
+    `<p>Bluffanteil = 50/(100+100) = <b>1/4</b> (Value : Bluff = 3 : 1). Call-Frequenz = 100/150 = <b>2/3</b>.</p>`,'',1),
+  P(`Pot 100, Einsatz 100: Du hast 4 Value-Hände im Einsatz-Bereich. Wie viele Bluff-Hände nimmst du dazu?`,
+    `<p>Value : Bluff = 2 : 1. Bei 4 Value-Händen also <b>2 Bluffs</b> (1/3 von 6).</p>`,'',1),
+  P(`Der Gegner foldet gegen deine Pot-große Wette in 60 % der Fälle. Lohnt sich ein reiner Bluff?`,
+    `<p>EV = 0,6·P − 0,4·b = 0,6 − 0,4 = <b>+0,2 Pot</b>. Ja. Break-even: Foldfrequenz b/(P+b) = 50 %.</p>`,'',2)
+ ]},
+
+/* ---------------- STUFE 4 ---------------- */
+{id:'auction',title:'Auktionen und Adverse Selection',dom:'game',tier:4,pre:['mixed'],
+ blurb:'Zweitpreis, Bid-Shading, Winner’s Curse.',
+ lesson:`
+ <h3>Zweitpreis-Auktion (Vickrey)</h3>
+ <p>Der Höchstbietende gewinnt und zahlt das zweithöchste Gebot. <b>Ehrlich bieten ist dominant.</b></p>
+ <h3>Erstpreis-Auktion</h3>
+ <p>Bid-Shading: Bei n Bietern mit gleichverteilten Werten bietest du <code>(n−1)/n · Wert</code>.</p>
+ <h3>Winner’s Curse und Adverse Selection</h3>
+ <p>Dass dein Gebot angenommen wird, ist eine Information: Der Verkäufer oder die Gegenpartei weiß mehr. Rechne deshalb mit dem <b>bedingten</b> Erwartungswert, gegeben dass du genommen wirst.</p>
+ <div class="callout"><b>Merksatz für Market Maker:</b> Wenn jemand genau jetzt handeln will, fragt sich: Was weiß er, was ich nicht weiß?</div>`,
+ probs:[
+  P(`Zweitpreis-Auktion, dein Wert ist 80. Warum bietest du nicht 60 oder 100?`,
+    `<p>Bietest du 60 &lt; 80: Das ändert den Ausgang nur, wenn der Höchstgebot-Gegner zwischen 60 und 80 liegt. Dann verlierst du einen Gewinn von 80 − p &gt; 0. Bietest du 100 &gt; 80: Du gewinnst manchmal zu Preisen über 80 und machst Verlust. <b>Ehrlich bieten (80)</b> ist dominant.</p>`,'',1),
+  P(`Erstpreis-Auktion mit zwei Bietern, Werte unabhängig gleichverteilt auf [0,1]. Was ist die Gleichgewichtsstrategie?`,
+    `<p>Biete <code>v/2</code>. Herleitung: Bei Gebotsstrategie c·v gewinnst du mit Wahrscheinlichkeit b/c. Gewinn (v−b)·b/c ist maximal bei b = v/2. Bei n Bietern: (n−1)/n · v.</p>`,'',3),
+  P(`<b>Übernahmespiel:</b> Eine Firma ist für den Verkäufer V wert (gleichverteilt auf [0,100]), für dich 1,5·V. Der Verkäufer kennt V und verkauft zu deinem Preis p genau dann, wenn V ≤ p. Welchen Preis bietest du?`,
+    `<p>Wird dein Gebot p angenommen, ist V gleichverteilt auf [0, p], im Mittel p/2. Für dich ist die Firma dann 1,5·p/2 = 0,75p wert, also weniger als p. <b>Jedes Gebot p &gt; 0 macht im Mittel Verlust.</b> Du bietest nichts (0).</p>`,`Rechne den Erwartungswert von V unter der Bedingung V ≤ p.`,3)
+ ]},
+
+{id:'mm',title:'Market Making und Kelly',dom:'fin',tier:4,pre:['ev','probbasics'],
+ blurb:'Fair Value, Spread, Information; optimaler Einsatz.',
+ lesson:`
+ <h3>Market-Making-Spiele</h3>
+ <p>Du nennst Bid und Ask, der Gegner wählt Kaufen oder Verkaufen. Vorgehen:</p>
+ <ol><li>Fair Value rechnen (Erwartungswert).</li><li>Spread setzen: Kompensation für Informierte und Inventarrisiko.</li><li>Nach jedem Trade Quotes verschieben: Er zeigt, was der Gegner glaubt.</li></ol>
+ <h3>Kelly</h3>
+ <p>Gewinnwahrscheinlichkeit p, q = 1−p, Nettoquote b (gewinnt b pro 1 Einsatz): optimaler Anteil <code>f* = p − q/b</code>. Bei Even Odds (b = 1): <code>f* = 2p − 1</code>. In der Praxis oft halbes Kelly.</p>`,
+ probs:[
+  P(`Du machst Markt auf die Summe zweier fairer Würfel. Fair Value 7. Du quotest 6,5 / 7,5, und ein <b>uninformierter</b> Kunde kauft zu 7,5. Erwarteter Gewinn?`,
+    `<p>Du verkaufst für 7,5 etwas, das im Mittel 7 wert ist: <b>+0,5</b> pro Trade.</p>`,'',1),
+  P(`Du quotest 3,0 / 4,0 auf die Augenzahl eines Würfels (FV 3,5). Der Kunde kauft zu 4,0. Danach nennt er dir: „Ich habe den Wurf gesehen.“ Was nimmst du an, und wie verschiebst du deine Quotes?`,
+    `<p>Hat er informiert gehandelt, ist sein Kauf ein Hinweis auf eine hohe Zahl. Du <b>verschiebst Bid und Ask nach oben</b> und/oder weitest den Spread. Das ist Adverse Selection.</p>`,'',2),
+  P(`Wette mit 55 % Gewinnchance bei gleicher Quote (Even Odds). Kelly-Anteil des Vermögens?`,
+    `<p>f* = 2p − 1 = <b>10 %</b>.</p>`,'',1),
+  P(`Wette mit 60 % Gewinnchance, Auszahlungsquote 2 : 1 (du gewinnst 2 pro 1 Einsatz). Kelly-Anteil?`,
+    `<p>f* = p − q/b = 0,6 − 0,4/2 = <b>40 %</b>.</p>`,'',2)
+ ]},
+
+{id:'options',title:'Arbitrage und Optionspreise',dom:'fin',tier:4,pre:['ev'],
+ blurb:'Put-Call-Parität, Binomialbaum, Replikation.',
+ lesson:`
+ <h3>No-Arbitrage</h3>
+ <p>Gibt es keinen risikolosen Gewinn, sind Preise aufeinander festgelegt.</p>
+ <h3>Put-Call-Parität</h3>
+ <p><code>C − P = S − K·e^(−rT)</code>. Bei r = 0: C − P = S − K.</p>
+ <h3>Ein-Perioden-Binomialmodell</h3>
+ <p>Risikoneutrale Wahrscheinlichkeit <code>q = (S·e^(rT) − S_down) / (S_up − S_down)</code>. Preis = diskontierter Erwartungswert der Auszahlung unter q. <b>Die echte Aufwärts-Wahrscheinlichkeit spielt keine Rolle</b>, weil sich die Option mit Aktie und Anleihe replizieren lässt.</p>
+ <h3>Auszahlungen</h3>
+ <p>Call: max(S−K, 0). Put: max(K−S, 0). Delta des Calls liegt zwischen 0 und 1 (ATM ≈ 0,5).</p>`,
+ probs:[
+  P(`Aktie S₀ = 100, steigt auf 120 oder fällt auf 80, r = 0. Preis eines Calls mit Strike 100?`,
+    `<p>q = (100−80)/(120−80) = 0,5. Auszahlung 20 mit 0,5, sonst 0: <b>10</b>. Mit Strike 110 wäre die Auszahlung 10: Preis 5.</p>`,'',1),
+  P(`S = 100, K = 100, r = 0, Call C = 8, Put P = 5. Gibt es Arbitrage? Wie nutzt du sie?`,
+    `<p>Parität verlangt C − P = 0, hier 3. Der Call ist zu teuer. <b>Verkaufe Call, kaufe Put, kaufe Aktie</b>: Kosten 100 + 5 − 8 = 97. Auszahlung am Ende immer 100: sicherer Gewinn von <b>3</b>.</p>`,'',2),
+  P(`S₀ = 100, Aufwärts 120, Abwärts 90, r = 0. Call-Preis mit Strike 100? Prüfe über Replikation.`,
+    `<p>q = (100−90)/(120−90) = 1/3. Preis = 20·(1/3) = <b>6,67</b>.</p><p>Replikation: Δ = 20/30 = 2/3 Aktie, Kredit 60. Kosten: 66,67 − 60 = 6,67. Abwärts: 60 − 60 = 0 ✓.</p>`,'',2),
+  P(`Welches Delta hat ein At-the-money-Call ungefähr, ein tief im Geld liegender, ein weit aus dem Geld liegender?`,
+    `<p>ATM ≈ <b>0,5</b>, tief im Geld ≈ <b>1</b>, weit aus dem Geld ≈ <b>0</b>.</p>`,'',1)
+ ]},
+
+{id:'stats',title:'Statistik und Regression',dom:'fin',tier:4,pre:['probbasics'],
+ blurb:'Varianz, CLT, OLS, Multiple Testing.',
+ lesson:`
+ <h3>Kernformeln</h3>
+ <ul>
+  <li><code>Var(aX+bY) = a²Var(X) + b²Var(Y) + 2ab·Cov(X,Y)</code>, Cov = ρ·σ_X·σ_Y.</li>
+  <li>Standardfehler des Mittelwerts: <code>σ/√n</code>.</li>
+  <li>Zentraler Grenzwertsatz: Summen werden annähernd normalverteilt.</li>
+  <li>OLS (eine Variable): β = Cov(x,y)/Var(x).</li>
+ </ul>
+ <h3>Fallen</h3>
+ <ul><li>R² steigt mit jeder weiteren Variable: Overfitting. Nutze Out-of-Sample-Tests.</li><li>Multiple Testing: Bei 20 Tests auf 5 % sind Fehlalarme zu erwarten.</li><li>Korrelation ist nicht Kausalität.</li></ul>`,
+ probs:[
+  P(`Var(X) = 4, Var(Y) = 9, Korrelation 0,5. Var(X+Y)?`,`<p>4 + 9 + 2·0,5·2·3 = <b>19</b>.</p>`,'',1),
+  P(`100 faire Münzen. Näherung für die Wahrscheinlichkeit von mindestens 60 Köpfen?`,
+    `<p>μ = 50, σ = √(100·¼) = 5. Mit Stetigkeitskorrektur z = (59,5 − 50)/5 = 1,9: P ≈ <b>2,9 %</b>.</p>`,'',2),
+  P(`Warum beweist ein höheres R² nach Hinzufügen einer Variable nicht, dass das Modell besser ist?`,
+    `<p>R² steigt mathematisch bei jeder Variable (auch Rauschen). Nutze <b>adjustiertes R²</b>, Kreuzvalidierung oder einen Out-of-Sample-Test.</p>`,'',2),
+  P(`Du testest 20 unabhängige Strategien zum 5-%-Niveau (alle ohne echten Effekt). Wie wahrscheinlich ist mindestens ein „signifikantes“ Ergebnis?`,
+    `<p>1 − 0,95²⁰ = <b>≈ 64 %</b>. Das ist Multiple Testing. Gegenmittel: Korrektur (z. B. Bonferroni), Hold-out-Daten.</p>`,'',2)
+ ]},
+
+{id:'code',title:'Coding-Muster',dom:'skill',tier:4,pre:[],
+ blurb:'Zwei Zeiger, Prefix-Summen, DP, Monte-Carlo.',
+ lesson:`
+ <h3>Was gefragt wird</h3>
+ <p>Meist Python oder C++, kleine Aufgaben mit Fokus auf Komplexität und Randfälle.</p>
+ <h3>Muster</h3>
+ <ul><li><b>Zwei Zeiger</b> auf sortierten Arrays.</li><li><b>Prefix-Summen</b> für Bereichsanfragen.</li><li><b>Hashmap</b> für „habe ich das schon gesehen?“.</li><li><b>DP:</b> Zustand + Übergang + Basisfall.</li><li><b>Simulation:</b> Wahrscheinlichkeiten nachprüfen.</li></ul>
+ <div class="callout"><b>Reihenfolge:</b> Eingaben klären, naive Lösung nennen, Komplexität verbessern, Randfälle testen (leer, ein Element, negativ).</div>`,
+ probs:[
+  P(`Gegeben eine Liste von Zahlen (auch negative). Finde die maximale Summe eines zusammenhängenden Teilstücks in O(n).`,
+    `<pre><code>def max_subarray(a):
+    best = cur = a[0]
+    for x in a[1:]:
+        cur = max(x, cur + x)   # neu starten oder fortsetzen
+        best = max(best, cur)
+    return best</code></pre><p>Kadane-Algorithmus: Laufzeit O(n), Speicher O(1).</p>`,'Lokal: Fortsetzen oder neu beginnen?',2),
+  P(`Schreibe eine Simulation, die die Wahrscheinlichkeit für zwei gleiche Geburtstage unter 23 Personen schätzt.`,
+    `<pre><code>import random
+
+def birthday(n=23, trials=100_000):
+    hits = 0
+    for _ in range(trials):
+        days = [random.randrange(365) for _ in range(n)]
+        hits += len(set(days)) != n
+    return hits / trials</code></pre><p>Erwartet: ca. 0,507.</p>`,'Menge der Geburtstage mit Länge vergleichen.',1),
+  P(`Ein sortiertes Array und ein Ziel T: Finde zwei Einträge mit Summe T in O(n).`,
+    `<pre><code>def two_sum_sorted(a, t):
+    i, j = 0, len(a) - 1
+    while i &lt; j:
+        s = a[i] + a[j]
+        if s == t:
+            return i, j
+        if s &lt; t:
+            i += 1
+        else:
+            j -= 1
+    return None</code></pre>`,'Zwei Zeiger an den Enden.',2),
+  P(`Auf wie viele Arten kann man eine Treppe mit n Stufen steigen, wenn man 1 oder 2 Stufen pro Schritt nimmt?`,
+    `<pre><code>def ways(n):
+    a, b = 1, 1
+    for _ in range(n - 1):
+        a, b = b, a + b
+    return b</code></pre><p>Rekursion f(n) = f(n−1) + f(n−2): Fibonacci. Laufzeit O(n), Speicher O(1).</p>`,'Letzter Schritt: 1 oder 2 Stufen.',2)
+ ]},
+
+{id:'comm',title:'Interviewführung',dom:'skill',tier:4,pre:[],
+ blurb:'Laut denken, Annahmen klären, Plausibilität prüfen.',
+ lesson:`
+ <h3>Ablauf bei jeder Aufgabe</h3>
+ <ol>
+  <li><b>Wiederholen und klären:</b> Annahmen nennen („fairer Würfel? Mit Zurücklegen?“).</li>
+  <li><b>Prinzip nennen:</b> „Das klingt nach Schubfach / Rückwärtsinduktion / Indifferenz.“</li>
+  <li><b>Laut rechnen,</b> kurze Schritte.</li>
+  <li><b>Plausibilität:</b> Grenzfälle, Vorzeichen, Größenordnung.</li>
+  <li><b>Ergebnis in einem Satz</b> wiederholen.</li>
+ </ol>
+ <h3>Wenn du hängst</h3>
+ <p>Nenne, was du probiert hast, und bitte um einen Hinweis. Interviewer wollen sehen, wie du mit einem Hinweis umgehst.</p>
+ <h3>Gespräch</h3>
+ <ul><li>Antworte auf „Warum Quant?“ mit einer konkreten Geschichte.</li><li>Kenne ein bis zwei Projekte im Detail.</li><li>Habe zwei Fragen an die Interviewer bereit.</li></ul>`,
+ probs:[
+  P(`Du hängst nach 3 Minuten. Was sagst du?`,
+    `<p>Beispiel: „Ich habe n = 1, 2, 3 durchgerechnet und vermute ein Muster, kann es aber noch nicht begründen. Ich würde jetzt versuchen, per Induktion zu argumentieren. Hast du einen Hinweis, ob ich auf dem richtigen Weg bin?“</p><p>Zeigt: Struktur, Fortschritt, Offenheit für Hinweise.</p>`,'',1),
+  P(`Du rechnest eine Wahrscheinlichkeit aus und erhältst 1,3. Was tust du?`,
+    `<p>Sofort sagen, dass das nicht sein kann (P ≤ 1), und den Fehler suchen: häufig doppelt gezählte Fälle oder fehlende Division. Ein Plausibilitäts-Check ist ein Pluspunkt, kein Schwächezeichen.</p>`,'',1),
+  P(`Erkläre Monty Hall in 30 Sekunden laut.`,
+    `<p>„Meine erste Wahl ist mit 1/3 richtig. Der Moderator zeigt immer eine Ziege, das ändert die 1/3 nicht. Also liegt das Auto mit 2/3 hinter der anderen Tür. Wechseln gewinnt genau dann, wenn meine erste Wahl falsch war: 2/3.“</p>`,'',1)
+ ]}
+];
+
+var byId={};SK.forEach(function(s){byId[s.id]=s;});
+var ALL=[];SK.forEach(function(s){s.probs.forEach(function(p,i){p.id=s.id+'-'+i;p.skill=s.id;p.n=i+1;ALL.push(p);});});
+
+/* ---------------- State ---------------- */
+var KEY='qil-v1',mem=null;
+function load(){
+  try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);o.lesson=o.lesson||{};o.p=o.p||{};o.drill=o.drill||{};return o;}}catch(e){}
+  return mem||{lesson:{},p:{},drill:{}};
+}
+var S=load();
+function save(){mem=S;try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+var ui={revealed:{},hint:{},filter:'all',confirmReset:false,importMsg:''};
+
+function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function pstate(id){return (S.p[id]&&S.p[id].s)||'';}
+function stats(sk){
+  var ok=0,rev=0,seen=0;
+  sk.probs.forEach(function(p){var s=pstate(p.id);if(s==='ok')ok++;if(s==='unsure'||s==='miss')rev++;if(s)seen++;});
+  var total=sk.probs.length,st='new';
+  if(S.lesson[sk.id]||seen>0)st='learning';
+  if(ok===total&&S.lesson[sk.id])st='done';
+  return {ok:ok,rev:rev,seen:seen,total:total,st:st};
+}
+function stLabel(st){return st==='done'?'Sitzt':st==='learning'?'Am Lernen':'Neu';}
+
+/* ---------------- Views ---------------- */
+function viewMap(){
+  var done=0,tot=ALL.length,rev=[];
+  ALL.forEach(function(p){var s=pstate(p.id);if(s==='ok')done++;if(s==='unsure'||s==='miss')rev.push(p);});
+  // nächster Schritt
+  var next=null;
+  for(var t=1;t<=4&&!next;t++){
+    for(var i=0;i<SK.length;i++){
+      var s=SK[i];if(s.tier!==t)continue;
+      if(stats(s).st==='done')continue;
+      var ready=s.pre.every(function(id){return stats(byId[id]).st!=='new';});
+      if(ready||stats(s).st==='learning'){next=s;break;}
+    }
+  }
+  if(!next){for(var j=0;j<SK.length;j++){if(stats(SK[j]).st!=='done'){next=SK[j];break;}}}
+  var h='<div class="eyebrow">Skill Map</div><h1 style="font-size:36px;margin:4px 0 0">Vom Denkmuster zum Interview</h1>'+
+    '<p class="lead">20 Skills in vier Stufen. Fokus auf Brainteaser-Techniken und Spieltheorie, dazu Wahrscheinlichkeit, Finance und Handwerk. Lies die Lektion, löse die Aufgaben, bewerte dich ehrlich.</p>';
+  if(next){
+    var ns=stats(next);
+    h+='<div class="next"><div><div class="eyebrow">Weiter mit</div><h2>'+esc(next.title)+'</h2><div class="muted" style="font-size:15px">'+ns.ok+' von '+ns.total+' Aufgaben gelöst</div></div><a class="btn primary" href="#s-'+next.id+'">'+(ns.st==='new'?'Starten':'Weitermachen')+'</a></div>';
+  } else {
+    h+='<div class="next"><div><div class="eyebrow">Stand</div><h2>Alle Skills sitzen</h2></div><a class="btn primary" href="#mock">Mock-Runde starten</a></div>';
+  }
+  if(rev.length){
+    h+='<div class="review"><div><b>'+rev.length+' Aufgabe'+(rev.length===1?'':'n')+' zur Wiederholung</b> <span class="muted">(unsicher oder nicht gelöst)</span></div><a class="btn small" href="#mock" data-act="mock-review">Wiederholungs-Runde</a></div>';
+  }
+  var f=ui.filter;
+  h+='<div class="chips" role="group" aria-label="Filter nach Bereich"><button class="btn" aria-pressed="'+(f==='all')+'" data-act="filter" data-val="all">Alle</button>';
+  Object.keys(DOMS).forEach(function(k){h+='<button class="btn" aria-pressed="'+(f===k)+'" data-act="filter" data-val="'+k+'">'+DOMS[k]+'</button>';});
+  h+='</div>';
+  for(var tr=1;tr<=4;tr++){
+    var list=SK.filter(function(s){return s.tier===tr&&(f==='all'||s.dom===f);});
+    if(!list.length)continue;
+    h+='<section class="tier"><div class="tier-h"><h2>'+TIERS[tr][0]+' · '+TIERS[tr][1]+'</h2><p>'+TIERS[tr][2]+'</p></div><div class="grid">';
+    list.forEach(function(s){
+      var st=stats(s);
+      var pre=s.pre.length?'<p class="pre">Baut auf: '+s.pre.map(function(id){return esc(byId[id].title);}).join(', ')+'</p>':'';
+      h+='<a class="node" href="#s-'+s.id+'" data-st="'+st.st+'"><span class="dom">'+DOMS[s.dom]+'</span><h3>'+esc(s.title)+'</h3><p class="blurb">'+esc(s.blurb)+'</p>'+pre+
+         '<div class="bar"><i style="width:'+Math.round(100*st.ok/st.total)+'%"></i></div><div class="meta"><span>'+st.ok+'/'+st.total+' gelöst</span><span class="st">'+stLabel(st.st)+'</span></div></a>';
+    });
+    h+='</div></section>';
+  }
+  return h;
+}
+
+function probCard(p,showSkill){
+  var s=pstate(p.id),rv=!!ui.revealed[p.id],hn=!!ui.hint[p.id];
+  var note=(S.p[p.id]&&S.p[p.id].a)||'';
+  var dots=new Array(p.lvl+1).join('●')+new Array(4-p.lvl).join('○');
+  var h='<article class="prob'+(s?' s-'+s:'')+'" id="pr-'+p.id+'"><div class="prob-h"><span>Aufgabe '+p.n+' · <span aria-label="Schwierigkeit '+p.lvl+' von 3">'+dots+'</span></span>'+(showSkill?'<a class="skl" href="#s-'+p.skill+'">'+esc(byId[p.skill].title)+'</a>':'')+'</div>'+
+   '<div class="q">'+p.q+'</div>';
+  if(p.hint){h+='<div class="row"><button class="btn small" data-act="hint" data-id="'+p.id+'" aria-expanded="'+hn+'">'+(hn?'Tipp ausblenden':'Tipp zeigen')+'</button></div>'+(hn?'<div class="hint">'+p.hint+'</div>':'');}
+  h+='<textarea data-note="'+p.id+'" id="n-'+p.id+'" rows="3" placeholder="Dein Ansatz (wird auf diesem Gerät gespeichert)" aria-label="Dein Ansatz">'+esc(note)+'</textarea>';
+  if(!rv){h+='<div class="row"><button class="btn primary small" data-act="reveal" data-id="'+p.id+'">Lösung zeigen</button></div>';}
+  else{
+    h+='<div class="sol">'+p.a+'</div><div class="rate" role="group" aria-label="Selbstbewertung"><span>Wie lief es?</span>'+
+      ['ok:Gelöst','unsure:Unsicher','miss:Nicht gelöst'].map(function(x){var a=x.split(':');return '<button class="btn small" data-act="rate" data-id="'+p.id+'" data-val="'+a[0]+'" aria-pressed="'+(s===a[0])+'">'+a[1]+'</button>';}).join('')+'</div>';
+  }
+  return h+'</article>';
+}
+
+function viewSkill(sk){
+  var st=stats(sk);
+  var h='<div class="crumbs"><a href="#map">← Skill Map</a></div><div class="skill-h"><div class="eyebrow">'+TIERS[sk.tier][0]+' · '+DOMS[sk.dom]+'</div><h1>'+esc(sk.title)+'</h1>';
+  if(sk.pre.length)h+='<div class="prelinks">Baut auf: '+sk.pre.map(function(id){return '<a href="#s-'+id+'">'+esc(byId[id].title)+'</a>';}).join(', ')+'</div>';
+  h+='</div><section class="lesson" aria-label="Lektion">'+sk.lesson+'<div class="readrow"><button class="btn small" data-act="lesson" data-id="'+sk.id+'" aria-pressed="'+(!!S.lesson[sk.id])+'">'+(S.lesson[sk.id]?'Lektion als gelesen markiert':'Lektion als gelesen markieren')+'</button></div></section>';
+  h+='<div class="probs-h"><h2>Aufgaben</h2><span class="muted mono" style="font-size:13px">'+st.ok+' von '+st.total+' gelöst</span></div>';
+  sk.probs.forEach(function(p){h+=probCard(p,false);});
+  var i=SK.indexOf(sk),nx=SK[i+1],pv=SK[i-1];
+  h+='<div class="nextskill">'+(pv?'<a class="btn" href="#s-'+pv.id+'">← '+esc(pv.title)+'</a>':'<span></span>')+(nx?'<a class="btn primary" href="#s-'+nx.id+'">'+esc(nx.title)+' →</a>':'')+'</div>';
+  return h;
+}
+
+/* ---- Mock ---- */
+var mock=null,mockTimer=null;
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function startMock(reviewOnly){
+  var rev=[],fresh=[],okk=[];
+  ALL.forEach(function(p){var s=pstate(p.id);if(s==='unsure'||s==='miss')rev.push(p);else if(!s)fresh.push(p);else okk.push(p);});
+  var pool=reviewOnly?shuffle(rev).concat([]):shuffle(rev).concat(shuffle(fresh),shuffle(okk));
+  var ids=pool.slice(0,6).map(function(p){return p.id;});
+  ui.revealed={};ui.hint={};
+  mock={ids:ids,end:Date.now()+25*60*1000};
+}
+function viewMock(){
+  var rev=ALL.filter(function(p){var s=pstate(p.id);return s==='unsure'||s==='miss';}).length;
+  if(!mock){
+    return '<div class="eyebrow">Mock-Runde</div><h1 style="font-size:34px;margin:4px 0 0">Sechs Aufgaben, 25 Minuten</h1><p class="lead">Wie ein Interview: Löse zuerst auf Papier oder im Notizfeld, decke die Lösung erst danach auf. Die Auswahl bevorzugt Aufgaben, die du noch nicht gelöst hast.</p>'+
+      '<div class="panel"><div class="row"><button class="btn primary" data-act="mock-start">Runde starten</button>'+(rev?'<button class="btn" data-act="mock-review">Nur Wiederholungsaufgaben ('+rev+')</button>':'')+'</div></div>';
+  }
+  var h='<div class="eyebrow">Mock-Runde</div><div class="row" style="align-items:center;justify-content:space-between;margin:6px 0 14px"><div class="timer" id="mock-t" aria-live="off">25:00</div><button class="btn" data-act="mock-end">Runde beenden</button></div>';
+  if(!mock.ids.length)h+='<p class="muted">Keine Aufgaben für diese Auswahl.</p>';
+  mock.ids.forEach(function(id){var p=ALL.filter(function(x){return x.id===id;})[0];h+=probCard(p,true);});
+  return h;
+}
+function tickMock(){
+  var el=document.getElementById('mock-t');if(!el||!mock)return;
+  var left=Math.max(0,mock.end-Date.now()),m=Math.floor(left/60000),s=Math.floor(left/1000)%60;
+  el.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  if(left===0){el.textContent='00:00 · Zeit abgelaufen';}
+}
+
+/* ---- Drill (Kopfrechnen) ---- */
+var drill={level:1,run:false,done:false,end:0,ok:0,bad:0,q:null,msg:'',timer:null};
+function rnd(a,b){return a+Math.floor(Math.random()*(b-a+1));}
+function gen(l){
+  var a,b,t;
+  if(l===1){
+    t=rnd(1,3);
+    if(t===1){a=rnd(12,89);b=rnd(12,89);return {t:a+' + '+b,a:a+b};}
+    if(t===2){a=rnd(40,99);b=rnd(11,a-1);return {t:a+' − '+b,a:a-b};}
+    a=rnd(12,99);b=rnd(2,9);return {t:a+' × '+b,a:a*b};
+  }
+  if(l===2){
+    t=rnd(1,5);
+    if(t===1){a=rnd(100,899);b=rnd(30,99);return {t:a+' + '+b,a:a+b};}
+    if(t===2){a=rnd(150,999);b=rnd(30,99);return {t:a+' − '+b,a:a-b};}
+    if(t===3){a=rnd(13,49);b=rnd(3,9);return {t:a+' × '+b,a:a*b};}
+    if(t===4){a=rnd(11,30);return {t:a+'²',a:a*a};}
+    var ps=[5,10,15,20,25,30,40,60,75],p=ps[rnd(0,ps.length-1)],k=rnd(2,40);
+    return {t:p+' % von '+(20*k),a:p*k/5};
+  }
+  t=rnd(1,6);
+  if(t===1){a=rnd(12,39);b=rnd(12,39);return {t:a+' × '+b,a:a*b};}
+  if(t===2){a=rnd(101,999);b=rnd(3,9);return {t:a+' × '+b,a:a*b};}
+  if(t===3){a=rnd(31,59);return {t:a+'²',a:a*a};}
+  if(t===4){var ps2=[15,35,45,65,85],p2=ps2[rnd(0,4)],k2=rnd(10,99);return {t:p2+' % von '+(20*k2),a:p2*k2/5};}
+  if(t===5){a=rnd(11,25);b=rnd(95,105);return {t:a+' × '+b,a:a*b};}
+  a=rnd(500,999);b=rnd(120,a-100);return {t:a+' − '+b,a:a-b};
+}
+function bestOf(l){return (S.drill&&S.drill['best'+l])||0;}
+function viewDrill(){
+  var h='<div class="eyebrow">Kopfrechnen</div><h1 style="font-size:34px;margin:4px 0 0">Speed-Training, 60 Sekunden</h1>';
+  if(drill.run){
+    return h+'<div class="panel"><div class="timer" id="dr-time">60</div><div class="stats"><div><b id="dr-ok">0</b>richtig</div><div><b id="dr-bad">0</b>falsch</div></div>'+
+      '<div class="drillq" id="dr-q"></div><form id="dr-form" class="drillrow" autocomplete="off"><input id="dr-in" inputmode="numeric" pattern="[0-9]*" enterkeyhint="go" aria-label="Antwort" autocomplete="off"><button class="btn primary" type="submit">Prüfen</button></form><p id="dr-msg" class="muted" style="min-height:1.6em;margin:10px 0 0"></p></div>';
+  }
+  if(drill.done){
+    var tot=drill.ok+drill.bad;
+    return h+'<div class="panel"><h2>Ergebnis, Stufe '+drill.level+'</h2><div class="stats"><div><b>'+drill.ok+'</b>richtig</div><div><b>'+drill.bad+'</b>falsch</div><div><b>'+(tot?Math.round(100*drill.ok/tot):0)+' %</b>Trefferquote</div><div><b>'+bestOf(drill.level)+'</b>Bestwert Stufe '+drill.level+'</div></div><div class="row"><button class="btn primary" data-act="drill-start">Nochmal</button><button class="btn" data-act="drill-reset">Stufe wechseln</button></div></div>';
+  }
+  h+='<p class="lead">Antworten als ganze Zahl. Falsche Antworten kosten nichts außer Zeit. Ziel: 20 richtige in 60 Sekunden.</p><div class="panel"><div class="chips" style="margin-top:0" role="group" aria-label="Stufe">';
+  [1,2,3].forEach(function(l){h+='<button class="btn" data-act="drill-level" data-val="'+l+'" aria-pressed="'+(drill.level===l)+'">Stufe '+l+' · Bestwert '+bestOf(l)+'</button>';});
+  h+='</div><p class="muted" style="margin:6px 0 14px">'+(drill.level===1?'Zweistellig addieren, subtrahieren, mit einer Ziffer multiplizieren.':drill.level===2?'Dreistellig, Quadrate bis 30, Prozente.':'Zweistellig mal zweistellig, Quadrate bis 59, Mischformen.')+'</p><button class="btn primary" data-act="drill-start">Start</button></div>';
+  return h;
+}
+function nextQ(){
+  drill.q=gen(drill.level);
+  var q=document.getElementById('dr-q'),i=document.getElementById('dr-in');
+  if(q)q.textContent=drill.q.t;
+  if(i){i.value='';i.focus();}
+}
+function drillTick(){
+  var el=document.getElementById('dr-time');
+  var left=Math.max(0,Math.ceil((drill.end-Date.now())/1000));
+  if(el)el.textContent=left;
+  if(left<=0)endDrill();
+}
+function endDrill(){
+  clearInterval(drill.timer);drill.timer=null;
+  drill.run=false;drill.done=true;
+  S.drill=S.drill||{};
+  if(drill.ok>bestOf(drill.level))S.drill['best'+drill.level]=drill.ok;
+  save();render();
+}
+
+/* ---- Daten ---- */
+function viewData(){
+  var json=JSON.stringify(S);
+  return '<div class="eyebrow">Fortschritt</div><h1 style="font-size:34px;margin:4px 0 0">Sichern und übertragen</h1>'+
+    '<p class="lead">Dein Fortschritt liegt nur in diesem Browser. Wenn du die Seite später unter einer anderen Adresse öffnest (zum Beispiel auf Vercel), kopierst du den Code hier heraus und fügst ihn dort ein.</p>'+
+    '<div class="panel"><h2>Exportieren</h2><textarea class="field" id="exp" readonly aria-label="Exportcode">'+esc(json)+'</textarea><div class="row"><button class="btn primary" data-act="copy">Code kopieren</button><span id="copymsg" class="muted" style="align-self:center"></span></div></div>'+
+    '<div class="panel"><h2>Importieren</h2><textarea class="field" id="imp" placeholder="Code hier einfügen" aria-label="Importcode"></textarea><div class="row"><button class="btn" data-act="import">Importieren</button><span class="muted" style="align-self:center">'+esc(ui.importMsg)+'</span></div></div>'+
+    '<div class="panel"><h2>Zurücksetzen</h2><p class="muted">Löscht Fortschritt, Notizen und Bestwerte auf diesem Gerät.</p><button class="btn" data-act="reset">'+(ui.confirmReset?'Wirklich alles löschen?':'Alles zurücksetzen')+'</button></div>';
+}
+
+/* ---------------- Router ---------------- */
+var app=document.getElementById('app');
+function curRoute(){return (location.hash||'#map').slice(1);}
+function render(){
+  var r=curRoute(),h;
+  if(r==='drill')h=viewDrill();
+  else if(r==='mock')h=viewMock();
+  else if(r==='data')h=viewData();
+  else if(r.indexOf('s-')===0&&byId[r.slice(2)])h=viewSkill(byId[r.slice(2)]);
+  else {r='map';h=viewMap();}
+  app.innerHTML=h;
+  var nav=document.querySelectorAll('[data-nav]');
+  for(var i=0;i<nav.length;i++){var on=(nav[i].getAttribute('data-nav')===(r.indexOf('s-')===0?'map':r));if(on)nav[i].setAttribute('aria-current','page');else nav[i].removeAttribute('aria-current');}
+  var ok=0;ALL.forEach(function(p){if(pstate(p.id)==='ok')ok++;});
+  document.getElementById('ov-txt').textContent=ok+' / '+ALL.length+' Aufgaben';
+  document.getElementById('ov-bar').style.width=Math.round(100*ok/ALL.length)+'%';
+  if(r==='drill'&&drill.run){drillTick();nextQ();}
+}
+function stopTimers(){
+  if(mockTimer){clearInterval(mockTimer);mockTimer=null;}
+  if(drill.timer&&curRoute()!=='drill'){clearInterval(drill.timer);drill.timer=null;drill.run=false;}
+}
+function rerender(){var y=window.scrollY;render();window.scrollTo(0,y);if(curRoute()==='mock'&&mock){tickMock();if(!mockTimer)mockTimer=setInterval(tickMock,1000);}}
+window.addEventListener('hashchange',function(){stopTimers();ui.confirmReset=false;render();window.scrollTo(0,0);if(curRoute()==='mock'&&mock){tickMock();mockTimer=setInterval(tickMock,1000);}});
+
+/* ---------------- Events ---------------- */
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-act]');if(!t)return;
+  var a=t.getAttribute('data-act'),id=t.getAttribute('data-id'),v=t.getAttribute('data-val');
+  if(a==='filter'){ui.filter=v;rerender();}
+  else if(a==='lesson'){S.lesson[id]=!S.lesson[id];save();rerender();}
+  else if(a==='hint'){ui.hint[id]=!ui.hint[id];rerender();}
+  else if(a==='reveal'){ui.revealed[id]=true;rerender();}
+  else if(a==='rate'){S.p[id]=S.p[id]||{};S.p[id].s=(S.p[id].s===v)?'':v;save();rerender();}
+  else if(a==='mock-start'){startMock(false);rerender();}
+  else if(a==='mock-review'){startMock(true);if(location.hash!=='#mock'){location.hash='#mock';}else{rerender();}}
+  else if(a==='mock-end'){mock=null;if(mockTimer){clearInterval(mockTimer);mockTimer=null;}rerender();}
+  else if(a==='drill-level'){drill.level=parseInt(v,10);rerender();}
+  else if(a==='drill-reset'){drill.done=false;rerender();}
+  else if(a==='drill-start'){
+    drill.run=true;drill.done=false;drill.ok=0;drill.bad=0;drill.end=Date.now()+60000;
+    render();clearInterval(drill.timer);drill.timer=setInterval(drillTick,250);
+  }
+  else if(a==='copy'){
+    var ta=document.getElementById('exp'),msg=document.getElementById('copymsg');
+    function sel(){ta.focus();ta.select();if(msg)msg.textContent='Zum Kopieren markiert. Auf dem iPad: Text antippen und „Kopieren“ wählen.';}
+    try{navigator.clipboard.writeText(ta.value).then(function(){if(msg)msg.textContent='Kopiert.';},sel);}catch(err){sel();}
+  }
+  else if(a==='import'){
+    var raw=document.getElementById('imp').value.trim();
+    try{
+      var o=JSON.parse(raw);
+      if(!o||typeof o!=='object'||!o.p)throw new Error('format');
+      S={lesson:o.lesson||{},p:o.p||{},drill:o.drill||{}};save();ui.importMsg='Importiert.';rerender();
+    }catch(err){ui.importMsg='Der Code ist ungültig.';rerender();}
+  }
+  else if(a==='reset'){
+    if(!ui.confirmReset){ui.confirmReset=true;rerender();}
+    else{S={lesson:{},p:{},drill:{}};save();ui.confirmReset=false;ui.revealed={};ui.hint={};mock=null;ui.importMsg='Zurückgesetzt.';rerender();}
+  }
+});
+document.addEventListener('input',function(e){
+  var t=e.target;
+  if(t.matches&&t.matches('textarea[data-note]')){var id=t.getAttribute('data-note');S.p[id]=S.p[id]||{};S.p[id].a=t.value;save();}
+});
+document.addEventListener('submit',function(e){
+  if(e.target.id!=='dr-form')return;
+  e.preventDefault();
+  var i=document.getElementById('dr-in'),m=document.getElementById('dr-msg');
+  if(!drill.q||!i||i.value.trim()==='')return;
+  var val=parseInt(i.value,10);
+  if(val===drill.q.a){drill.ok++;if(m){m.textContent='Richtig';m.className='flash-ok';}}
+  else{drill.bad++;if(m){m.textContent=drill.q.t+' = '+drill.q.a;m.className='flash-bad';}}
+  var o=document.getElementById('dr-ok'),b=document.getElementById('dr-bad');
+  if(o)o.textContent=drill.ok;if(b)b.textContent=drill.bad;
+  nextQ();
+});
+
+render();
+})();
+</script>
+
+</body>
+</html>
